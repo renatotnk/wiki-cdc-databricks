@@ -1,11 +1,8 @@
 from pyspark import pipelines as dp
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, current_timestamp
+from pyspark.sql.functions import col, current_timestamp, to_timestamp
 from pyspark.sql.types import (
     BooleanType,
-    DateType,
-    IntegerType,
-    LongType,
     StringType,
     StructField,
     StructType,
@@ -19,6 +16,7 @@ WIKI_REFERENCE_SCHEMA = StructType(
         StructField("project_type", StringType(), True),
         StructField("is_closed", BooleanType(), True),
         StructField("_snapshot_fetched_at", TimestampType(), True),
+        StructField("_bronze_loaded_at", TimestampType(), False),
     ]
 )
 
@@ -28,6 +26,7 @@ WIKI_REFERENCE_SCHEMA = StructType(
     schema=WIKI_REFERENCE_SCHEMA,
     table_properties={
         "quality": "bronze",
+        "inferred_schema": "false",
         "layer": "bronze",
         "source_format": "json",
         "delta.enableChangeDataFeed": "true",
@@ -44,9 +43,9 @@ def bronze_recentchange():
     path = "/Volumes/wiki-cdc-streaming/raw/wiki-cdc-streaming/dim_wiki_reference/"
 
     return (
-        spark.readStream
-            .format("cloudFiles")
-            .option("cloudFiles.format", "json")
+        spark.read
+            .format("json")
             .load(path)
+            .withColumn("_snapshot_fetched_at", to_timestamp(col("_snapshot_fetched_at")))
             .withColumn("_bronze_loaded_at", current_timestamp())
     )
