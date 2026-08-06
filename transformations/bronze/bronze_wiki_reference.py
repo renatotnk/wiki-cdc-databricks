@@ -4,9 +4,6 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import col, current_timestamp
 from pyspark.sql.types import (
     BooleanType,
-    DateType,
-    IntegerType,
-    LongType,
     StringType,
     StructField,
     StructType,
@@ -30,6 +27,7 @@ WIKI_REFERENCE_SCHEMA = StructType(
     schema=WIKI_REFERENCE_SCHEMA,
     table_properties={
         "quality": "bronze",
+        "inferred_schema": "false",
         "layer": "bronze",
         "source_format": "json",
         "delta.enableChangeDataFeed": "true",
