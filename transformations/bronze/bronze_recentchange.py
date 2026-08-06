@@ -84,6 +84,7 @@ def bronze_recentchange():
         spark.readStream
             .format("cloudFiles")
             .option("cloudFiles.format", "parquet")
+            #.option("cloudFiles.useNotifications", "true")
             .load(path)
             .withColumn("_bronze_loaded_at", current_timestamp())
     )
